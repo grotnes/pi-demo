@@ -1,12 +1,28 @@
 from sense_hat import SenseHat
 from time import sleep
 from random import randint
+import logging
 
-# Create a logfile
-bufsize = 0
-f = open("/home/pi/pi-demo/logfile.txt", "w", buffering = bufsize)
-f.write("Started.\n");
-f.flush
+# Setting up logging
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+fh = logging.FileHandler('/home/pi/pi-demo/logfile.txt')
+fh.setLevel(logging.INFO)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+logger.debug('#### Started. ####')
+
+
+########################
+
 
 sense = SenseHat()
 sense.low_light = True
@@ -16,29 +32,28 @@ active = "Dot" # Active subprogram
 busy   = False  # Status
 
 def write_ip_addr():
-	print("Starts Write IP addr")
+	logger.info("Starts Write IP addr")
 	global busy, active, f
 	busy = True
 	active = ""
 	import netifaces as ni
-	#ni.ifaddresses('eth0')
-	#ip = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
-	#print ip  # should print "192.168.100.37"
-	#print dir(ni)
-	print ni.interfaces()
+	logger.debug("Listing interfaces.")
+	interfaces = ni.interfaces()
+	#print(interfaces)
+	logger.debug("Found interfaces ")
+	logger.debug(interfaces)
 
 	for interface in ni.interfaces():
 		if interface == "lo":
 			continue
 	
-		print "Found interface " + interface
-		f.write("Found interface " + interface + ", ")
-		print(ni.ifaddresses(interface))
+		#print "Found interface " + interface
+		logger.info("Found interface " + interface + ", ")
+		#print(ni.ifaddresses(interface))
 		try:
 			ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
-			print "IP = " + ip
-			f.write("IP = " + ip +".\n")
-			f.flush
+			#print "IP = " + ip
+			logger.info("IP = " + ip +".")
 			sense.show_message(interface + ":" + ip)
 		except:
 			pass
@@ -46,7 +61,7 @@ def write_ip_addr():
 
 def smilefjes():
 	global busy, active
-	print("Starts Smilefjes.")
+	logger.info("Starts Smilefjes.")
 	busy = True
 	active = ""
 	sense.clear()
@@ -85,7 +100,7 @@ def init_dot():
 def dot():
 	# Make a dot that moves when you flip
 	global busy, active
-	print("Starts Dot")
+	logger.info("Starts Dot")
 	busy = True
 	active = "Dot"
 	init_dot()
@@ -147,9 +162,9 @@ def handle_joystick(event):
 	global busy
 	global f
 	if event.action == 'pressed' and busy == False:
-		print("Got event " + event.direction + ". Busy = ")
-		print(busy)
-		print("active was '"+active+"'")
+		logger.info("Got event " + event.direction + ". Busy = ")
+		logger.info(busy)
+		logger.info("active was '"+active+"'")
 		if event.direction == 'up':
 			active = "IP"
 		if event.direction == 'down':
@@ -160,15 +175,15 @@ def handle_joystick(event):
 			active = "Magic"
 		if event.direction == 'middle':
 			active = "Quit"
-		print("Active is now " + active)
-		f.write("Requested action "+active+".\n")
+		logger.info("Active is now " + active)
+		logger.debug("Requested action "+active+".")
 	else:
-		print("Keypress ignored. Action="+event.action+" Busy =")
-		print(busy)
-		print("active was '"+active+"'")
+		logger.info("Keypress ignored. Action="+event.action+" Busy =")
+		logger.info(busy)
+		logger.info("active was '"+active+"'")
 
 def magic_eigth():
-	print("Starts Magic Eigth")
+	logger.info("Starts Magic Eigth")
 	global active,busy
 	active = "Magic"
 	busy = False
@@ -286,5 +301,5 @@ while True:
 		#quit()
 	#active = ""
 	busy = False
-	print("Venter paa input")
+	logger.debug("Venter paa input")
 	sleep(0.1)
