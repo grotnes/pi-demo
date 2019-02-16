@@ -1,12 +1,13 @@
 from sense_hat import SenseHat
 from time import sleep
+from random import randint
 #import socket
 
 sense = SenseHat()
 sense.low_light = True
 
 # Define global variables
-active = "dot" # Active subprogram
+active = "Dot" # Active subprogram
 busy   = False  # Status
 
 def write_ip_addr():
@@ -40,6 +41,7 @@ def smilefjes():
 	print("Starts Smilefjes.")
 	busy = True
 	active = ""
+	sense.clear()
 	sense.set_pixel(2, 2, (0, 0, 255))
 	sense.set_pixel(4, 2, (0, 0, 255))
 	sense.set_pixel(3, 4, (100, 0, 0))
@@ -48,7 +50,7 @@ def smilefjes():
 	sense.set_pixel(3, 6, (255, 0, 0))
 	sense.set_pixel(4, 6, (255, 0, 0))
 	sense.set_pixel(5, 5, (255, 0, 0))
-	busy = False
+busy = False
 
 def init_dot():
 	# Draws the screen background for the "dot" program
@@ -133,8 +135,12 @@ def dot():
 
 
 def handle_joystick(event):
-	global active, busy
-	if event.action == 'pressed':# and busy == False:
+	global active
+	global busy
+	if event.action == 'pressed' and busy == False:
+		print("Got event " + event.direction + ". Busy = ")
+		print(busy)
+		print("active was '"+active+"'")
 		if event.direction == 'up':
 			active = "IP"
 		if event.direction == 'down':
@@ -142,13 +148,107 @@ def handle_joystick(event):
 		if event.direction == 'left':
 			active = "Dot"
 		if event.direction == 'right':
-			active = "Blue"
+			active = "Magic"
 		if event.direction == 'middle':
 			active = "Quit"
+		print("Active is now " + active)
+	else:
+		print("Keypress ignored. Action="+event.action+" Busy =")
+		print(busy)
+		print("active was '"+active+"'")
 
-def blue():
-	print("Starts Blue")
-	sense.clear((0,0,255))
+def magic_eigth():
+	print("Starts Magic Eigth")
+	global active,busy
+	active = "Magic"
+	busy = False
+	r = (255,0,0)
+	w = (255,255,255)
+	b = (0,0,255)
+	magic_message = [
+		"Go fish 0",
+		"Go fish 1",
+		"Go fish 2",
+		"Go fish 3",
+		"Go fish 4",
+		"Go fish 5",
+		"Go fish 6",
+		"Go fish 7",
+		"Go fish 8",
+		"Go fish 9",
+	]
+	# Set up where each colour will display
+	pause_picture = [
+	  [
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, w, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b
+	  ], [
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, w, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b
+	  ], [
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, w, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b
+	  ], [
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, w, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b,
+	    b, b, b, b, b, b, b, b
+	  ]
+	]
+
+	p = 0
+	while active == "Magic":
+		# Display wait-screen
+		sense.set_pixels(pause_picture[p])
+		p += 1
+		if p>= 4:
+			p = 0
+		sleep(0.1)
+
+		# Check if PI is shaken
+		acceleration = sense.get_accelerometer_raw()
+		x = acceleration['x']
+		y = acceleration['y']
+		z = acceleration['z']
+
+		x = abs(x)
+		y = abs(y)
+		z = abs(z)
+
+		if x > 3 or y > 3 or z > 3:
+			shake = True
+		else:
+			shake = False
+
+		# Write message if PI is shaken
+		if shake:
+			random = randint(0,9)
+			busy = True
+			sense.show_message(magic_message[random])
+			sleep(1)
+			busy = False
 
 # Make handles for joystick events
 sense.stick.direction_up     = handle_joystick
@@ -169,10 +269,12 @@ while True:
 	if active == "Dot":
 		sense.clear((0,0,255))
 		dot()
-	if active == "Blue":
-		blue()
+	if active == "Magic":
+		magic_eigth()
 	if active == "Quit":
-		sense.clear((0,0,255))
-		quit()
+		sense.clear((120,0,255))
+		#quit()
+	#active = ""
+	busy = False
 	print("Venter paa input")
 	sleep(0.5)
