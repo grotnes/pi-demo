@@ -1,7 +1,12 @@
 from sense_hat import SenseHat
 from time import sleep
 from random import randint
-#import socket
+
+# Create a logfile
+bufsize = 0
+f = open("/home/pi/pi-demo/logfile.txt", "w", buffering = bufsize)
+f.write("Started.\n");
+f.flush
 
 sense = SenseHat()
 sense.low_light = True
@@ -12,7 +17,7 @@ busy   = False  # Status
 
 def write_ip_addr():
 	print("Starts Write IP addr")
-	global busy, active
+	global busy, active, f
 	busy = True
 	active = ""
 	import netifaces as ni
@@ -27,10 +32,13 @@ def write_ip_addr():
 			continue
 	
 		print "Found interface " + interface
+		f.write("Found interface " + interface + ", ")
 		print(ni.ifaddresses(interface))
 		try:
 			ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
 			print "IP = " + ip
+			f.write("IP = " + ip +".\n")
+			f.flush
 			sense.show_message(interface + ":" + ip)
 		except:
 			pass
@@ -137,6 +145,7 @@ def dot():
 def handle_joystick(event):
 	global active
 	global busy
+	global f
 	if event.action == 'pressed' and busy == False:
 		print("Got event " + event.direction + ". Busy = ")
 		print(busy)
@@ -152,6 +161,7 @@ def handle_joystick(event):
 		if event.direction == 'middle':
 			active = "Quit"
 		print("Active is now " + active)
+		f.write("Requested action "+active+".\n")
 	else:
 		print("Keypress ignored. Action="+event.action+" Busy =")
 		print(busy)
