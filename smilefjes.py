@@ -166,16 +166,16 @@ def magic_eigth():
 	w = (255,255,255)
 	b = (0,0,255)
 	magic_message = [
-		"Go fish 0",
-		"Go fish 1",
-		"Go fish 2",
-		"Go fish 3",
-		"Go fish 4",
-		"Go fish 5",
-		"Go fish 6",
-		"Go fish 7",
-		"Go fish 8",
-		"Go fish 9",
+		"Ta en kake",
+		"Spis lunch",
+		"Tid for lekser",
+		"En gang til",
+		"Hopp over et kast",
+		"Syng en sang",
+		"Fortell en vits",
+		"Sett deg ned",
+		"Trust me",
+		"Have fun"
 	]
 	# Set up where each colour will display
 	pause_picture = [
