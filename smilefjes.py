@@ -277,4 +277,4 @@ while True:
 	#active = ""
 	busy = False
 	print("Venter paa input")
-	sleep(0.5)
+	sleep(0.1)
