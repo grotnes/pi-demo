@@ -33,31 +33,34 @@ busy   = False  # Status
 
 def write_ip_addr():
 	logger.info("Starts Write IP addr")
-	global busy, active, f
-	busy = True
-	active = ""
-	import netifaces as ni
-	logger.debug("Listing interfaces.")
-	interfaces = ni.interfaces()
-	#print(interfaces)
-	logger.debug("Found interfaces ")
-	logger.debug(interfaces)
+	try:
+		global busy, active, f
+		busy = True
+		active = ""
+		import netifaces as ni
+		logger.debug("Listing interfaces.")
+		interfaces = ni.interfaces()
+		#print(interfaces)
+		logger.debug("Found interfaces ")
+		logger.debug(interfaces)
 
-	for interface in ni.interfaces():
-		if interface == "lo":
-			continue
+		for interface in ni.interfaces():
+			if interface == "lo":
+				continue
 	
-		#print "Found interface " + interface
-		logger.info("Found interface " + interface + ", ")
-		#print(ni.ifaddresses(interface))
-		try:
-			ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
-			#print "IP = " + ip
-			logger.info("IP = " + ip +".")
-			sense.show_message(interface + ":" + ip)
-		except:
-			pass
-	busy = False
+			#print "Found interface " + interface
+			logger.info("Found interface " + interface + ", ")
+			#print(ni.ifaddresses(interface))
+			try:
+				ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+				#print "IP = " + ip
+				logger.info("IP = " + ip +".")
+				sense.show_message(interface + ":" + ip)
+			except:
+				pass
+		busy = False
+	except Exception as e:
+		logging.error('Error occurred ' + str(e))
 
 def smilefjes():
 	global busy, active
