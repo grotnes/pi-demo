@@ -84,12 +84,16 @@ def dot():
 		# Stop dot from going over edge
 		if (x_pos < 0):
 			x_pos = 0
+			x_calc = 0
 		if (y_pos < 0):
 			y_pos = 0
+			y_calc = 0
 		if (x_pos > 7):
 			x_pos = 7
+			x_calc = 7
 		if (y_pos > 7):
 			y_pos = 7
+			y_calc = 7
 
 		if (x_pos - x_previous != 0):
 			change = 1
@@ -98,7 +102,8 @@ def dot():
 		else:
 			change = 0
 
-		print("x_pos={0}, y_pos={1}, change={2}, x={3}, y={4}, z={5}".format(x_pos, y_pos, change, x, y, z))
+		#print("x_pos={0}, y_pos={1}, change={2}, x={3}, y={4}, z={5}".format(x_pos, y_pos, change, x, y, z))
+		print("x_pos={0}, y_pos={1}, change={2}, x_prev={3}, y_prev={4}".format(x_pos, y_pos, change, x_calc, y_calc))
 
 		if (change == 1):
 			sense.set_pixel(x_previous, y_previous, previous_color)
