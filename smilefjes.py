@@ -2,6 +2,8 @@ from sense_hat import SenseHat
 from time import sleep
 from random import randint
 import logging
+import socket
+import threading
 
 # Setting up logging
 logger = logging.getLogger()
@@ -30,6 +32,64 @@ sense.low_light = True
 # Define global variables
 active = "Dot" # Active subprogram
 busy   = False  # Status
+
+def telnet_client():
+	wlan = ""
+	while wlan == "":
+		import netifaces as ni
+		interfaces = ni.interfaces()
+		logger.debug("Searching for IP in ")
+		logger.debug(interfaces)
+
+		for interface in ni.interfaces():
+			if interface != "wlan0":
+				continue
+	
+			logger.debug("Found interface " + interface + ", ")
+			try:
+				ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+				logger.debug("IP = \"" + ip +"\"")
+				wlan = str(ip)
+			except:
+				pass
+		if wlan == "":
+			logger.debug("Waiting for net.")
+			sleep(5)
+
+	connected = False
+	while not connected:
+		try:
+			logger.debug("Binding to interface...")
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.bind((wlan, 2323))
+			connected = True
+		except Exception as e:
+			logging.debug('Could not connect: ' + str(e))
+			sleep(5)
+			connected = False
+
+	logger.debug("Listening for incoming connections.")
+	s.listen(1)
+	conn, addr = s.accept()
+	connected = True
+	logger.info("Incoming Telnet from ")
+	logger.info(addr)
+	received = ""
+	while connected:
+		data = conn.recv(1024)
+		if (ord(data[0]) != 13):
+			received += data
+			conn.sendall(data) # Echo
+			continue
+			
+		logger.info(received)
+		if received.startswith("quit"):
+			s.shutdown(socket.SHUT_RDWR)
+			s.close()
+			connected = False
+			logger.info("Closed connection.")
+			sleep(1)
+		received = ""	 # Clear the received string
 
 def write_ip_addr():
 	logger.info("Starts Write IP addr")
@@ -287,6 +347,8 @@ sense.stick.direction_middle = handle_joystick
 
 busy = False
 active = "Dot"
+threading.Thread(target=telnet_client).start()
+
 while True:
 	if active == "IP":
 		sense.clear((0,0,255))
