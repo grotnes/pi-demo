@@ -34,6 +34,7 @@ active = "Dot" # Active subprogram
 busy   = False  # Status
 
 def telnet_client():
+	global active
 	wlan = ""
 	while wlan == "":
 		import netifaces as ni
@@ -83,6 +84,10 @@ def telnet_client():
 			continue
 			
 		logger.info(received)
+		if received.startswith("smil"):
+			active = "Smilefjes"
+		if received.startswith("dot"):
+			active = "Dot"
 		if received.startswith("quit"):
 			s.shutdown(socket.SHUT_RDWR)
 			s.close()
@@ -347,7 +352,8 @@ sense.stick.direction_middle = handle_joystick
 
 busy = False
 active = "Dot"
-threading.Thread(target=telnet_client).start()
+t = threading.Thread(target=telnet_client)
+t.start()
 
 while True:
 	if active == "IP":
